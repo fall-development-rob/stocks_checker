@@ -5,6 +5,7 @@ import com.distill.stocks.service.StocksService;
 import com.distill.stocks.repository.StockDailyRepository;
 import com.distill.stocks.model.StockInfo;
 import com.distill.stocks.utils.Logging;
+import org.joda.time.LocalDate;
 import com.distill.stocks.dto.StockDto;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,7 +17,6 @@ import java.util.ArrayList;
 import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import java.time.LocalDate;
 
 public class StocksServiceTest {
 
@@ -24,7 +24,7 @@ public class StocksServiceTest {
     private StockDailyRepository stockDailyRepository;
 
     @InjectMocks
-    private StocksService stocksService;
+    private StocksService StocksService;
 
     @BeforeEach
     public void setUp() {
@@ -40,7 +40,7 @@ public class StocksServiceTest {
                 .thenReturn(false);
 
         // Call the method and assert
-        stocksService.fetchStockData("AAPL", LocalDate.now());
+        StocksService.fetchStockData("AAPL", LocalDate.now());
         Mockito.verify(stockDailyRepository, Mockito.times(1)).existsByTickerAndDate("AAPL", LocalDate.now());
     }
 
@@ -52,7 +52,7 @@ public class StocksServiceTest {
         // Add sample data to top10Stocks and top5Companies
 
         // Call the method
-        stocksService.displayStats();
+        StocksService.displayStats();
     }
 
 }

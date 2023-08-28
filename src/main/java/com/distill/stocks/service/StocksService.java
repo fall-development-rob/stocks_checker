@@ -42,8 +42,6 @@ public class StocksService {
     @Autowired
     private StocksProperties config;
 
-
-
     private final ExecutorService executorService = Executors.newFixedThreadPool(1);
     private final Thread printer = new Thread(() -> {
         while (true) {

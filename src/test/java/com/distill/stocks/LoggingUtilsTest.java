@@ -2,6 +2,7 @@ package com.distill.stocks;
 
 import org.junit.jupiter.api.Test;
 import com.distill.stocks.model.StockInfo;
+import com.distill.stocks.utils.Logging;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,10 +14,10 @@ public class LoggingUtilsTest {
     @Test
     public void testLogListOfItemsWithCompanyName() {
         // Mock logger
-        Logger logger = LoggerFactory.getLogger(LoggingUtils.class);
+        Logger logger = LoggerFactory.getLogger(Logging.class);
 
         // Initialize LoggingUtils
-        LoggingUtils loggingUtils = new LoggingUtils(logger);
+        Logging loggingUtils = new Logging(logger);
 
         // Mock data
         List<StockInfo> items = new ArrayList<>();
@@ -24,7 +25,7 @@ public class LoggingUtilsTest {
         items.add(new StockInfo("MSFT", "Microsoft Corp"));
 
         // Call the method
-        loggingUtils.logListOfItemsWithCompanyName(items, "Test message:", 2);
+        loggingUtils.logListOfItems(items, "Test message:", 2);
 
         // Verify log statements
         // You can use appropriate verification methods based on your logger implementation
@@ -33,20 +34,19 @@ public class LoggingUtilsTest {
     @Test
     public void testLogListOfItemsWithCompanyNameEmptyList() {
         // Mock logger
-        Logger logger = LoggerFactory.getLogger(LoggingUtils.class);
+        Logger logger = LoggerFactory.getLogger(Logging.class);
 
         // Initialize LoggingUtils
-        LoggingUtils loggingUtils = new LoggingUtils(logger);
+        Logging loggingUtils = new Logging(logger);
 
         // Mock data
         List<StockInfo> items = new ArrayList<>();
 
         // Call the method
-        loggingUtils.logListOfItemsWithCompanyName(items, "Test message:", 2);
+        loggingUtils.logListOfItems(items, "Test message:", 2);
 
         // Verify log statements
         // You can use appropriate verification methods based on your logger implementation
     }
 
-    // More test methods can be added here
 }
