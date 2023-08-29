@@ -32,7 +32,7 @@ public class StocksService {
     private static final Logger logger = LoggerFactory.getLogger(StocksService.class);
     private final Logging loggingUtils = new Logging(logger);
 
-    private static final LinkedList<String> tickers = new LinkedList<>();
+    private static final LinkedList<StockInfo> tickers = new LinkedList<>();
 
     private static final Object tickersLock = new Object(); // Lock for synchronization
 
@@ -43,6 +43,7 @@ public class StocksService {
     private StocksProperties config;
 
     private final ExecutorService executorService = Executors.newFixedThreadPool(1);
+
     private final Thread printer = new Thread(() -> {
         while (true) {
             print();
@@ -57,27 +58,27 @@ public class StocksService {
     @PostConstruct
     public void start() {
         synchronized (tickersLock) {
-            tickers.add(String.valueOf(new StockInfo("AAPL", "Apple Inc")));
-            tickers.add(String.valueOf(new StockInfo("MSFT", "Microsoft Corp")));
-            tickers.add(String.valueOf(new StockInfo("GOOG", "Alphabet Inc Class C")));
-            tickers.add(String.valueOf(new StockInfo("AMZN", "Amazon.Com Inc.")));
-            tickers.add(String.valueOf(new StockInfo("NVDA", "Nvidia Corp")));
-            tickers.add(String.valueOf(new StockInfo("TSLA", "Tesla Inc")));
-            tickers.add(String.valueOf(new StockInfo("META", "Meta Platforms, Inc.")));
-            tickers.add(String.valueOf(new StockInfo("NFLX", "Netflix Inc")));
-            tickers.add(String.valueOf(new StockInfo("INTC", "Intel Corporation Corp")));
-            tickers.add(String.valueOf(new StockInfo("SBUX", "Starbucks Corp")));
-            tickers.add(String.valueOf(new StockInfo("ABNB", "Airbnb, Inc.")));
-            tickers.add(String.valueOf(new StockInfo("PYPL", "Paypal Holdings Inc")));
-            tickers.add(String.valueOf(new StockInfo("ATVI", "Activision Blizzard Inc")));
-            tickers.add(String.valueOf(new StockInfo("MDLZ", "Mondelez International Inc")));
-            tickers.add(String.valueOf(new StockInfo("ADP", "Automatic Data Processing Inc")));
-            tickers.add(String.valueOf(new StockInfo("REGN", "Regeneron Pharmaceuticals Inc")));
-            tickers.add(String.valueOf(new StockInfo("ISRG", "Intuitive Surgical Inc")));
-            tickers.add(String.valueOf(new StockInfo("VRTX", "Vertex Pharmaceuticals Inc")));
-            tickers.add(String.valueOf(new StockInfo("MU", "Micron Technology Inc")));
-            tickers.add(String.valueOf(new StockInfo("MELI", "Mercadolibre Inc")));
-            tickers.add(String.valueOf(new StockInfo("PYPL", "Paypal Holdings Inc")));
+            tickers.add(  new StockInfo("AAPL", "Apple Inc"  ));
+            tickers.add(  new StockInfo("MSFT", "Microsoft Corp"  ));
+            tickers.add(  new StockInfo("GOOG", "Alphabet Inc Class C"  ));
+            tickers.add(  new StockInfo("AMZN", "Amazon.Com Inc."  ));
+            tickers.add(  new StockInfo("NVDA", "Nvidia Corp"  ));
+            tickers.add(  new StockInfo("TSLA", "Tesla Inc"  ));
+            tickers.add(  new StockInfo("META", "Meta Platforms, Inc."  ));
+            tickers.add(  new StockInfo("NFLX", "Netflix Inc"  ));
+            tickers.add(  new StockInfo("INTC", "Intel Corporation Corp"  ));
+            tickers.add(  new StockInfo("SBUX", "Starbucks Corp"  ));
+            tickers.add(  new StockInfo("ABNB", "Airbnb, Inc."  ));
+            tickers.add(  new StockInfo("PYPL", "Paypal Holdings Inc"  ));
+            tickers.add(  new StockInfo("ATVI", "Activision Blizzard Inc"  ));
+            tickers.add(  new StockInfo("MDLZ", "Mondelez International Inc"  ));
+            tickers.add(  new StockInfo("ADP", "Automatic Data Processing Inc"  ));
+            tickers.add(  new StockInfo("REGN", "Regeneron Pharmaceuticals Inc"  ));
+            tickers.add(  new StockInfo("ISRG", "Intuitive Surgical Inc"  ));
+            tickers.add(  new StockInfo("VRTX", "Vertex Pharmaceuticals Inc"  ));
+            tickers.add(  new StockInfo("MU", "Micron Technology Inc"  ));
+            tickers.add(  new StockInfo("MELI", "Mercadolibre Inc"  ));
+            tickers.add(  new StockInfo("PYPL", "Paypal Holdings Inc"  ));
         }
 
         // Today's date requires upgraded api plan.
@@ -85,9 +86,9 @@ public class StocksService {
         LocalDate dateToRequest = yesterday.minusDays(config.getFetchDataForDays());
 
         while (!dateToRequest.isAfter(yesterday)) {
-            for (String ticker : tickers) {
-                if (!stockDailyRepository.existsByTickerAndDate(ticker, dateToRequest)) {
-                    executorService.submit(getTickerRunnable(ticker, dateToRequest));
+            for (StockInfo ticker : tickers) {
+                if (!stockDailyRepository.existsByTickerAndDate(ticker.getSymbol(), dateToRequest)) {
+                    executorService.submit(getTickerRunnable(ticker.getSymbol(), dateToRequest));
                 }
             }
             dateToRequest = dateToRequest.plusDays(1);
@@ -108,9 +109,9 @@ public class StocksService {
                             stockDaily.setOpen(stockDto.getOpen());
                             stockDaily.setLow(stockDto.getLow());
                             stockDaily.setHigh(stockDto.getHigh());
-                            stockDaily.setClose(stockDto.getHigh());
+                            stockDaily.setClose(stockDto.getClose());
                             stockDaily.setVolume(stockDto.getVolume());
-                            stockDaily.setDate(LocalDate.parse(stockDto.getFrom(), DateTimeFormat.forPattern("yyyy-MM-dd")));
+                            stockDaily.setDate(LocalDate.parse(stockDto.getFrom(), DateTimeFormat.forPattern("yyyy-MM-dd"  )));
                             return stockDaily;
                         })
                         .ifPresent(stockDailyRepository::save);
@@ -151,16 +152,16 @@ public class StocksService {
 
             // Calculate % change for each company over a 3-day period
             Map<String, Double> percentChangeMap = new HashMap<>();
-            for (String ticker : tickers) {
+            for (StockInfo ticker : tickers) {
                 List<StockDaily> companyStocks = stocks.stream()
-                        .filter(stock -> stock.getTicker().equals(ticker))
+                        .filter(stock -> stock.getTicker().equals(ticker.getSymbol()))
                         .collect(Collectors.toList());
 
                 if (companyStocks.size() >= 3) {
                     double initialOpen = companyStocks.get(2).getOpen();
                     double finalClose = companyStocks.get(0).getClose();
                     double percentChange = ((finalClose - initialOpen) / initialOpen) * 100;
-                    percentChangeMap.put(ticker, percentChange);
+                    percentChangeMap.put(ticker.getCompanyName(), percentChange);
                 }
             }
 
@@ -168,7 +169,7 @@ public class StocksService {
             percentChangeMap.entrySet().stream()
                     .sorted(Map.Entry.<String, Double>comparingByValue().reversed())
                     .limit(5)
-                    .forEach(entry -> top5Companies.add(entry.getKey()));
+                    .forEach(entry -> top5Companies.add(entry.getKey(  )));
 
             return top5Companies;
         }
